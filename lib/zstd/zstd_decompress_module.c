@@ -77,7 +77,16 @@ EXPORT_SYMBOL(zstd_init_dstream);
 
 size_t zstd_reset_dstream(zstd_dstream *dstream)
 {
-	return ZSTD_resetDStream(dstream);
+	size_t ret = ZSTD_DCtx_reset(dstream, ZSTD_reset_session_only);
+	int format;
+
+	if (ZSTD_isError(ret))
+		return ret;
+	ret = ZSTD_DCtx_getParameter(dstream, ZSTD_d_format, &format);
+	if (ZSTD_isError(ret))
+		return ret;
+	/* Keep ZSTD_resetDStream()'s next-input-size hint. */
+	return ZSTD_FRAMEHEADERSIZE_PREFIX((ZSTD_format_e)format);
 }
 EXPORT_SYMBOL(zstd_reset_dstream);
 
@@ -97,7 +106,27 @@ EXPORT_SYMBOL(zstd_find_frame_compressed_size);
 size_t zstd_get_frame_header(zstd_frame_header *header, const void *src,
 	size_t src_size)
 {
-	return ZSTD_getFrameHeader(header, src, src_size);
+	ZSTD_FrameHeader parsed = { 0 };
+	size_t ret;
+
+	/* Preserve the old output size, padding, and short-input contract. */
+	memset(header, 0, sizeof(*header));
+	if (src_size < ZSTD_FRAMEHEADERSIZE_PREFIX(ZSTD_f_zstd1))
+		return ZSTD_FRAMEHEADERSIZE_PREFIX(ZSTD_f_zstd1);
+	ret = ZSTD_getFrameHeader(&parsed, src, src_size);
+
+	/* The upstream header grew reserved fields after Linux 6.1. */
+	header->frameContentSize = parsed.frameContentSize;
+	header->windowSize = parsed.windowSize;
+	header->blockSizeMax = parsed.blockSizeMax;
+	header->frameType = parsed.frameType;
+	/* Linux 6.1 reported no dictionary or header size for skipped frames. */
+	if (parsed.frameType != ZSTD_skippableFrame) {
+		header->headerSize = parsed.headerSize;
+		header->dictID = parsed.dictID;
+	}
+	header->checksumFlag = parsed.checksumFlag;
+	return ret;
 }
 EXPORT_SYMBOL(zstd_get_frame_header);
 

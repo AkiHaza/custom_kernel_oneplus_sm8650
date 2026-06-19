@@ -16,6 +16,7 @@
 #include <linux/gfp.h>
 #include <linux/jhash.h>
 #include <net/tcp.h>
+#include "tcp_bbr3.h"
 #include <trace/events/tcp.h>
 
 static DEFINE_SPINLOCK(tcp_cong_list_lock);
@@ -189,6 +190,7 @@ void tcp_init_congestion_control(struct sock *sk)
 	struct inet_connection_sock *icsk = inet_csk(sk);
 
 	tcp_sk(sk)->prior_ssthresh = 0;
+	tcp_bbr3_reset(tcp_sk(sk));
 	if (icsk->icsk_ca_ops->init)
 		icsk->icsk_ca_ops->init(sk);
 	if (tcp_ca_needs_ecn(sk))
@@ -486,3 +488,33 @@ struct tcp_congestion_ops tcp_reno = {
 	.cong_avoid	= tcp_reno_cong_avoid,
 	.undo_cwnd	= tcp_reno_undo_cwnd,
 };
+
+/* Identify the private BBRv3 allocation by its registered operations object,
+ * never by a name that another module or BPF controller could also use.
+ * Socket-held module references pin the object; the reader only compares it.
+ */
+static const struct tcp_congestion_ops *tcp_bbr3_ops;
+
+bool tcp_ca_is_bbr3(const struct sock *sk)
+{
+	const struct tcp_congestion_ops *ops = READ_ONCE(tcp_bbr3_ops);
+
+	return ops && inet_csk(sk)->icsk_ca_ops == ops;
+}
+
+int tcp_register_bbr3(struct tcp_congestion_ops *ca)
+{
+	int ret = tcp_register_congestion_control(ca);
+
+	if (!ret)
+		WRITE_ONCE(tcp_bbr3_ops, ca);
+	return ret;
+}
+EXPORT_SYMBOL_GPL(tcp_register_bbr3);
+
+void tcp_unregister_bbr3(struct tcp_congestion_ops *ca)
+{
+	WRITE_ONCE(tcp_bbr3_ops, NULL);
+	tcp_unregister_congestion_control(ca);
+}
+EXPORT_SYMBOL_GPL(tcp_unregister_bbr3);

@@ -272,6 +272,7 @@
 #include <net/icmp.h>
 #include <net/inet_common.h>
 #include <net/tcp.h>
+#include "tcp_bbr3.h"
 #include <net/mptcp.h>
 #include <net/xfrm.h>
 #include <net/ip.h>
@@ -3226,6 +3227,7 @@ int tcp_disconnect(struct sock *sk, int flags)
 	tp->rx_opt.dsack = 0;
 	tp->rx_opt.num_sacks = 0;
 	tp->rcv_ooopack = 0;
+	tcp_bbr3_reset(tp);
 
 
 	/* Clean up fastopen related fields */

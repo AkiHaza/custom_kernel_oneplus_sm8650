@@ -1754,6 +1754,7 @@ out:
 		zram_set_handle(zram, index, handle);
 		zram_set_obj_size(zram, index, comp_len);
 	}
+	zram_accessed(zram, index);
 	zram_slot_unlock(zram, index);
 
 	/* Update stats */

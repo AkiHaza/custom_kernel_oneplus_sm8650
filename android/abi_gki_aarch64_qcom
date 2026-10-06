@@ -574,6 +574,7 @@
   device_match_name
   device_match_of_node
   device_move
+  device_node_to_regmap
   device_property_match_string
   device_property_present
   device_property_read_string
@@ -2395,6 +2396,7 @@
   pci_irq_vector
   pci_load_and_free_saved_state
   pci_load_saved_state
+  pci_lock_rescan_remove
   pci_msi_create_irq_domain
   pci_msi_mask_irq
   pci_msi_unmask_irq
@@ -2412,6 +2414,7 @@
   pci_stop_root_bus
   pci_stop_and_remove_bus_device_locked
   pci_store_saved_state
+  pci_unlock_rescan_remove
   pci_unregister_driver
   pci_walk_bus
   pci_write_config_dword

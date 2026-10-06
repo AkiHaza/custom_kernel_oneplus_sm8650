@@ -113,5 +113,6 @@ obj-$(CONFIG_CHARGER_SURFACE)	+= surface_charger.o
 #ifndef OPLUS_FEATURE_CHG_BASIC
 #obj-$(CONFIG_QTI_BATTERY_CHARGER)	+= qti_battery_charger.o
 #endif
+obj-$(CONFIG_QTI_TYPEC_CLASS)		+= qti_typec_class.o
 obj-$(CONFIG_BATTERY_UG3105)	+= ug3105_battery.o
 obj-$(CONFIG_QCOM_POWER_SUPPLY)	+= qcom/

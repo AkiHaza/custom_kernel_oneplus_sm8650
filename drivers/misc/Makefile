@@ -77,3 +77,6 @@ obj-$(CONFIG_SIH_VIBRATOR) += vibrator/si_haptic/
 obj-$(CONFIG_OPLUS_HAPTIC_COMMON) += vibrator/oplus_haptic/
 #endif
 obj-$(CONFIG_OPLUS_POWER_NOTIFIER) += oplus_power_notifier/
+obj-$(CONFIG_USBMUX_PS8822)     += usbmux_ps8822.o
+obj-$(CONFIG_CCI_UTIL)          += dpin_cci_util.o
+obj-$(CONFIG_LONTIUM_LT7911UXC) += lontium-lt7911uxc.o

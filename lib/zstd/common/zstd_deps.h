@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ OR BSD-3-Clause */
 /*
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -115,7 +115,10 @@ static uint64_t ZSTD_div64(uint64_t dividend, uint32_t divisor) {
 #ifndef ZSTD_DEPS_STDINT
 #define ZSTD_DEPS_STDINT
 
-/* Linux 6.1 does not provide intptr_t. */
+/*
+ * The Linux Kernel doesn't provide intptr_t, only uintptr_t, which
+ * is an unsigned long.
+ */
 typedef long intptr_t;
 
 #endif /* ZSTD_DEPS_STDINT */
